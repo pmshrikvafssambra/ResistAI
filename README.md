@@ -5,10 +5,21 @@ ResistAI is a competition-grade AI system designed for the **CodeCure AI Hackath
 
 ## 🚀 Tech Stack & Tools
 - **Language**: Python (ML Pipeline), TypeScript (Web Interface)
-- **ML Libraries**: Scikit-learn, XGBoost, LightGBM, SHAP
+- **ML Libraries**: Scikit-learn, XGBoost, LightGBM, SHAP, Category Encoders
 - **Web Framework**: React (Frontend), Express (Backend)
 - **Data Visualization**: Recharts, D3.js
 - **Explainability**: SHAP (Shapley Additive Explanations)
+
+## 🛠️ NumPy 2.0 Compatibility Fix
+We have resolved the `ImportError: numpy.core.multiarray failed to import` by pinning `numpy<2.0.0` and ensuring all dependencies are compatible with the legacy NumPy 1.x ABI while supporting modern features.
+
+## ⚡ God-Level ML Pipeline
+The prediction engine has been upgraded to a **Stacking Ensemble Classifier**:
+- **Base Models**: Random Forest, XGBoost, LightGBM.
+- **Meta-Model**: Logistic Regression for optimal weight blending.
+- **Feature Engineering**: Target encoding, interaction terms, and dosage binning.
+- **Imbalance Handling**: SMOTE (Synthetic Minority Over-sampling Technique) to ensure high accuracy even on rare resistant strains.
+- **Accuracy Goal**: 90% - 100% on validated clinical datasets.
 
 ## 📂 Dataset Description
 - **Primary Dataset**: [Mendeley - Antibiotic Susceptibility](https://data.mendeley.com/datasets/ccmrx8n7mk/1)
@@ -32,7 +43,7 @@ ResistAI is a competition-grade AI system designed for the **CodeCure AI Hackath
 ## 🛠️ Installation & Setup
 1. Clone the repository:
    ```bash
-   git clone https://https://github.com/pmshrikvafssambra/ResistAI.git
+   git clone https://github.com/your-username/ResistAI.git
    ```
 2. Install dependencies:
    ```bash
