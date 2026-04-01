@@ -63,8 +63,16 @@ from xgboost import XGBClassifier
 from lightgbm import LGBMClassifier
 
 # Imbalance & Encoding
-from imblearn.over_sampling import SMOTE, ADASYN
-from imblearn.pipeline import Pipeline as ImbPipeline
+try:
+    from imblearn.over_sampling import SMOTE, ADASYN
+    from imblearn.pipeline import Pipeline as ImbPipeline
+except ImportError as e:
+    if "_safe_tags" in str(e):
+        print("\n" + "!"*80)
+        print("IMPORT ERROR DETECTED: imbalanced-learn version mismatch with scikit-learn.")
+        print("Fix: Run 'pip install \"scikit-learn<1.6.0\" \"imbalanced-learn>=0.12.0\"'")
+        print("!"*80 + "\n")
+    raise e
 import category_encoders as ce
 
 # Suppress warnings

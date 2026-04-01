@@ -48,9 +48,19 @@ The prediction engine has been upgraded to a **Stacking Ensemble Classifier**:
 2. Install dependencies:
    ```bash
    npm install
+   pip install -r requirements.txt
    ```
 3. Set up environment variables:
    - Create a `.env` file and add your `GEMINI_API_KEY`.
+
+## ⚠️ Troubleshooting
+### ImportError: cannot import name '_safe_tags' from 'sklearn.utils._tags'
+This is a known version mismatch between `scikit-learn` and `imbalanced-learn`.
+**Fix**: Run the following command to pin compatible versions:
+```bash
+pip install "scikit-learn<1.6.0" "imbalanced-learn>=0.12.0"
+```
+We have updated `requirements.txt` to prevent this, but if you have a pre-existing environment, manually running the above command will resolve it.
 
 ## 🖥️ How to Run the Project
 - **Development Mode**:
