@@ -32,7 +32,7 @@ ResistAI is a competition-grade AI system designed for the **CodeCure AI Hackath
 ## 🛠️ Installation & Setup
 1. Clone the repository:
    ```bash
-   git clone https://github.com/your-username/ResistAI.git
+   git clone https://https://github.com/pmshrikvafssambra/ResistAI.git
    ```
 2. Install dependencies:
    ```bash
