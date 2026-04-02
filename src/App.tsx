@@ -173,6 +173,10 @@ export default function App() {
               <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
               <span className="text-xs font-mono text-white/60">System Online</span>
             </div>
+            <div className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/5 border border-white/10">
+              <Database className="w-3 h-3 text-orange-500" />
+              <span className="text-xs font-mono text-white/60">Model: v2.0-Master</span>
+            </div>
             <button className="p-2 text-white/40 hover:text-white transition-colors">
               <Search className="w-5 h-5" />
             </button>
@@ -414,7 +418,15 @@ export default function App() {
                         {/* Result Card */}
                         <div className="p-10 rounded-[2rem] bg-[#111] border border-white/5 relative overflow-hidden">
                           <div className="flex items-center justify-between mb-8">
-                            <h3 className="text-sm font-bold uppercase tracking-wider text-white/40">Prediction Result</h3>
+                            <div className="flex flex-col gap-1">
+                              <h3 className="text-sm font-bold uppercase tracking-wider text-white/40">Prediction Result</h3>
+                              {prediction.realModelUsed && (
+                                <div className="flex items-center gap-1.5 text-[10px] text-orange-500 font-bold uppercase tracking-widest">
+                                  <CheckCircle2 className="w-3 h-3" />
+                                  Verified by ResistAI ML Engine
+                                </div>
+                              )}
+                            </div>
                             <div className={cn(
                               "px-4 py-1 rounded-full text-[10px] font-bold uppercase tracking-widest",
                               prediction.prediction === 'Resistant' ? "bg-red-500/20 text-red-500" : "bg-green-500/20 text-green-500"
