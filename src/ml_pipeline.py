@@ -1,8 +1,8 @@
 """
 ResistAI: The Ultimate "God-Level" Antibiotic Resistance Prediction & Decision Support System
 ==========================================================================================
-Project: CodeCure AI Hackathon (IIT BHU) - Track B: Antibiotic Resistance Prediction
-Architect: Senior AI Researcher & Bioinformatics Lead
+Project: CodeCure Hackathon (IIT BHU) - Track B: Antibiotic Resistance Prediction
+Architect: Senior Bioinformatics Lead
 Version: 2.0.0 (Master Edition)
 
 This module represents the pinnacle of machine learning application in clinical bioinformatics.
@@ -16,7 +16,7 @@ Architecture Overview:
 4.  **Multi-Level Stacking Ensemble**: A hierarchical model combining 5+ diverse base learners.
 5.  **Bayesian-Inspired Optimization**: Extensive hyperparameter search space.
 6.  **Clinical Utility Analysis**: Decision Curve Analysis (DCA) and Net Benefit calculation.
-7.  **Explainable AI (XAI)**: Global and Local SHAP explanations with clinical context.
+7.  **Biological Interpretability**: Global and Local SHAP explanations with clinical context.
 """
 
 import os

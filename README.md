@@ -1,7 +1,7 @@
 # ResistAI: Clinical-Grade Antibiotic Resistance Prediction & Decision Support
 
 **Team Name:** CodeCurer  
-**Project:** CodeCure AI Hackathon (IIT BHU) – Track B: Antibiotic Resistance Prediction
+**Project:** CodeCure Hackathon (IIT BHU) – Track B: Antibiotic Resistance Prediction
 
 ---
 
@@ -44,29 +44,41 @@ We don't just feed raw data into the model. We've engineered "Surgical Features"
 ### 2. High-Performance "God-Mode" Pipeline
 Utilizing a **HistGradientBoosting** architecture, we've achieved a 10x speedup over traditional Random Forests while maintaining superior accuracy. The model uses histogram-based binning to handle large-scale clinical data in seconds.
 
-### 3. Explainable AI (XAI) & Clinical Trust
+### 3. Clinical Reasoning Engine & Trust
 Every prediction is backed by a global and local feature importance engine. We provide:
 - **Global Clinical Predictors**: Visualizing what the model considers most important (e.g., Gram Stain, Antibiotic Class).
 - **Decision Curve Analysis (DCA)**: Proving the "Net Benefit" of the model over standard "Treat All" or "Treat None" strategies.
 
 ---
 
-## 🛠️ Installation & Setup
+## 🛠️ Prerequisites
+
+Before you begin, ensure you have the following installed:
+- **Python 3.9+**: For the ML pipeline and inference engine.
+- **Node.js 18+**: For the interactive clinical dashboard.
+- **npm**: To manage frontend dependencies.
+
+## ⚙️ Installation & Setup
 
 1. **Clone the repository**:
    ```bash
    git clone https://github.com/pmshrikvafssambra/ResistAI.git
+   cd ResistAI
    ```
 
-2. **Install Clinical Dependencies**:
+2. **Install Python Dependencies**:
    ```bash
    pip install -r requirements.txt
    ```
 
+3. **Install Frontend Dependencies**:
+   ```bash
+   npm install
+   ```
 
 ---
 
-## 🚀 How to Run the Pipeline
+## 🚀 How to Run the Project
 
 ### 1. Train the Master Model
 This generates the 80,000-sample dataset, trains the God-Mode model, and generates clinical plots in the `plots/` directory.
@@ -74,8 +86,15 @@ This generates the 80,000-sample dataset, trains the God-Mode model, and generat
 python src/ml_pipeline.py
 ```
 
-### 2. Run Clinical Predictions (Stress Testing)
-Use our robust prediction engine to simulate real-world scenarios.
+### 2. Start the Clinical Dashboard (UI)
+This starts the Express.js backend and the Vite-powered React frontend.
+```bash
+npm run dev
+```
+Once started, open your browser and navigate to `http://localhost:3000`.
+
+### 3. CLI Clinical Predictions (Stress Testing)
+You can also use the robust prediction engine directly via the command line.
 
 **Scenario A: The "Gold Standard" Test (S. aureus vs Vancomycin)**
 ```bash
@@ -89,11 +108,20 @@ python src/predict.py --bacteria "K. pneumoniae" --antibiotic "Meropenem" --dosa
 ```
 *Expected: RESISTANT (High Confidence due to genetic marker detection)*
 
-**Scenario C: The "Generalization" Test (Out-of-Distribution Overdose)**
-```bash
-python src/predict.py --bacteria "E. coli" --antibiotic "Amoxicillin" --dosage 5000 --age 150 --ward "OPD"
-```
-*Expected: SUSCEPTIBLE (Model correctly extrapolates high-dosage susceptibility)*
+---
+
+## 🖥️ Interactive Clinical Dashboard (UI)
+
+ResistAI features a production-grade, dark-themed dashboard designed for high-stakes clinical environments.
+
+### Key UI Features:
+- **Real-time Inference**: A comprehensive form to input patient age, sex, ward type, dosage, and genetic markers.
+- **Visual Confidence Levels**: Dynamic progress bars and confidence percentages for every prediction.
+- **Clinical Reasoning Engine**: Instant, human-readable biological explanations for the model's decisions.
+- **MDR Risk Visualization**: A 100-point risk score grid for Multi-Drug Resistance assessment.
+- **Interactive Charts**: Resistance trends and strain distribution charts powered by **Recharts**.
+- **Case Simulation**: A dedicated mode to generate and analyze complex clinical scenarios with one click.
+- **Architecture Insights**: A visual breakdown of the multi-level stacking ensemble and clinical utility (DCA) plots.
 
 ---
 
@@ -105,4 +133,4 @@ While many teams focus solely on accuracy, **CodeCurer** focuses on **Clinical U
 In a real hospital, a model that is 99% accurate but has a high "False Susceptible" rate is dangerous. ResistAI is calibrated to minimize "Clinical Harm." Our **Brier Score of 0.0009** proves that our model's probability estimates are not just high—they are **accurate representations of clinical reality.**
 
 ---
-*Developed by Team CodeCurer for the CodeCure AI Hackathon (IIT BHU).*
+*Developed by Team CodeCurer for the CodeCure Hackathon (IIT BHU).*

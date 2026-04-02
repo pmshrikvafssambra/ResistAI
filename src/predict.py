@@ -58,10 +58,15 @@ def predict(bacteria, antibiotic, dosage_mg, age=45, sex='M', exposure=5, ward='
         # Calculate MDR risk score
         mdr_risk = int(probabilities[2] * 100)
         
+        # Generate Clinical Insights (Explanation & Recommendation)
+        explanation, recommendation = get_clinical_insights(bacteria, antibiotic, prediction, ndm1, mcr1)
+        
         return {
             "prediction": prediction,
             "probability": f"{probability:.2%}",
             "mdrRiskScore": f"{mdr_risk}%",
+            "explanation": explanation,
+            "recommendation": recommendation,
             "clinical_context": {
                 "bacteria": bacteria,
                 "antibiotic": antibiotic,
@@ -71,6 +76,33 @@ def predict(bacteria, antibiotic, dosage_mg, age=45, sex='M', exposure=5, ward='
             },
             "status": "success"
         }
+
+def get_clinical_insights(bacteria, antibiotic, prediction, ndm1, mcr1):
+    """
+    Generates deterministic clinical insights based on the ML prediction 
+    and biological markers. This replaces the need for an external LLM.
+    """
+    explanation = ""
+    recommendation = ""
+    
+    if prediction == "Resistant":
+        if ndm1:
+            explanation = f"The resistance in {bacteria} is highly correlated with the detected NDM-1 (New Delhi Metallo-beta-lactamase) gene. This enzyme hydrolyzes almost all beta-lactams, including carbapenems like {antibiotic}."
+            recommendation = "Consider non-beta-lactam alternatives such as Tigecycline, Colistin, or Fosfomycin. Infectious Disease consultation is strongly advised."
+        elif mcr1:
+            explanation = f"The resistance is likely driven by the mcr-1 gene, which mediates plasmid-borne colistin resistance. This significantly limits the efficacy of last-resort polymyxins."
+            recommendation = "Evaluate susceptibility to Ceftazidime-Avibactam or Meropenem-Vaborbactam if appropriate for the strain."
+        else:
+            explanation = f"The ML model identified a high probability of resistance for {bacteria} against {antibiotic}. This may be due to intrinsic resistance mechanisms, efflux pump over-expression, or porin mutations common in this clinical profile."
+            recommendation = "Perform formal E-test or broth microdilution to confirm MIC. Switch to a different antibiotic class (e.g., Aminoglycosides or Fluoroquinolones) pending further sensitivity testing."
+    elif prediction == "Intermediate":
+        explanation = f"{bacteria} shows reduced susceptibility to {antibiotic}. The dosage of {dosage_mg}mg may be insufficient to reach the required PK/PD targets (fT>MIC) for effective clearance."
+        recommendation = "Consider increasing the dosage or using an extended infusion strategy. Monitor therapeutic drug levels if possible."
+    else: # Susceptible
+        explanation = f"The model predicts that {bacteria} is susceptible to {antibiotic}. The clinical parameters and absence of major resistance markers suggest a high likelihood of treatment success."
+        recommendation = "Continue current regimen. Monitor for clinical improvement over the next 48-72 hours."
+        
+    return explanation, recommendation
         
     except Exception as e:
         return {"error": str(e)}

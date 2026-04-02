@@ -450,11 +450,11 @@ export default function App() {
                           </div>
                         </div>
 
-                        {/* Explainable AI Section */}
+                        {/* Clinical Reasoning Engine Section */}
                         <div className="p-10 rounded-[2rem] bg-[#111] border border-white/5">
                           <div className="flex items-center gap-3 mb-6">
                             <Zap className="w-5 h-5 text-orange-500" />
-                            <h3 className="text-sm font-bold uppercase tracking-wider text-white/40">Explainable AI (XAI)</h3>
+                            <h3 className="text-sm font-bold uppercase tracking-wider text-white/40">Clinical Reasoning Engine</h3>
                           </div>
                           <p className="text-white/60 leading-relaxed mb-8 italic">
                             "{prediction.explanation}"

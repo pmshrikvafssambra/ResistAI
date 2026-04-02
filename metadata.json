@@ -1,5 +1,5 @@
 {
   "name": "ResistAI: Antibiotic Resistance Prediction & Decision Support",
-  "description": "A competition-grade AI system for predicting bacterial antibiotic resistance with explainable insights and clinical decision support, built for the CodeCure AI Hackathon.",
+  "description": "A competition-grade clinical decision support system for predicting bacterial antibiotic resistance with explainable insights, built for the CodeCure AI Hackathon.",
   "requestFramePermissions": []
 }

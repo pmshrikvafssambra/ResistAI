@@ -3,7 +3,7 @@ import { createServer as createViteServer } from "vite";
 import path from "path";
 import cors from "cors";
 import dotenv from "dotenv";
-import { GoogleGenAI } from "@google/genai";
+import { exec } from "child_process";
 
 dotenv.config();
 
@@ -13,9 +13,6 @@ async function startServer() {
 
   app.use(cors());
   app.use(express.json());
-
-  // Initialize Gemini AI for "Explainable AI" and "Decision Support"
-  const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY || "" });
 
   // API Route: Antibiotic Resistance Prediction (Real ML Inference)
   app.post("/api/predict", async (req, res) => {
@@ -27,7 +24,6 @@ async function startServer() {
     } = req.body;
 
     // Call the Python inference bridge (src/predict.py)
-    const { exec } = require('child_process');
     const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
     
     const runInference = () => {
@@ -62,6 +58,8 @@ async function startServer() {
     let prediction = "Susceptible";
     let probability = 0.94;
     let mdrRiskScore = 15;
+    let explanation = "The simulated model identified potential susceptibility based on standard clinical guidelines.";
+    let recommendation = "Continue monitoring.";
     let realModelUsed = false;
 
     try {
@@ -70,37 +68,14 @@ async function startServer() {
         prediction = result.prediction;
         probability = result.probability;
         mdrRiskScore = result.mdrRiskScore;
+        explanation = result.explanation;
+        recommendation = result.recommendation;
         realModelUsed = true;
       } else {
         console.warn("Model inference failed, falling back to simulation:", result.error);
       }
     } catch (error) {
       console.warn("Python bridge failed, falling back to simulation:", error);
-    }
-
-    // Use Gemini to provide "Explainable AI" insights
-    let explanation = realModelUsed 
-      ? `The Multi-Level Stacking Ensemble (XGBoost + LightGBM + RF + SVC) analyzed the clinical features and identified high correlation between the bacterial strain's Gram-stain properties and the antibiotic's mechanism of action.`
-      : "The simulated model identified potential susceptibility based on standard clinical guidelines.";
-    let recommendation = "";
-
-    try {
-      if (process.env.GEMINI_API_KEY) {
-        const prompt = `As a bioinformatics expert, explain why a bacterial strain like ${bacteria} might be ${prediction} to ${antibiotic} at a dosage of ${dosage}mg. Provide a concise, scientific explanation and suggest an alternative antibiotic if it's resistant. Format as JSON: { "explanation": "...", "recommendation": "..." }`;
-        const result = await ai.models.generateContent({
-          model: "gemini-3-flash-preview",
-          contents: prompt,
-          config: { responseMimeType: "application/json" }
-        });
-        const responseText = result.text;
-        if (responseText) {
-            const parsed = JSON.parse(responseText);
-            explanation = parsed.explanation;
-            recommendation = parsed.recommendation;
-        }
-      }
-    } catch (error) {
-      console.error("Gemini AI Error:", error);
     }
 
     res.json({
