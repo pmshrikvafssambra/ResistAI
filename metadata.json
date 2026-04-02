@@ -1,5 +1,5 @@
 {
   "name": "ResistAI: Antibiotic Resistance Prediction & Decision Support",
-  "description": "A competition-grade clinical decision support system for predicting bacterial antibiotic resistance with explainable insights, built for the CodeCure AI Hackathon.",
+  "description": "A production-grade AMR prediction system using Gradient Boosting and CARD biological priors. Features stratified evaluation, leakage prevention, and clinical confidence scoring.",
   "requestFramePermissions": []
 }

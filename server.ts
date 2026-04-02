@@ -1,9 +1,12 @@
+
 import express from "express";
 import { createServer as createViteServer } from "vite";
 import path from "path";
 import cors from "cors";
 import dotenv from "dotenv";
-import { exec } from "child_process";
+import fs from 'fs';
+import { exec, spawn } from 'child_process';
+import { loadTabularData, loadCardData, loadLocationData } from "./src/lib/data_processing";
 
 dotenv.config();
 
@@ -14,88 +17,104 @@ async function startServer() {
   app.use(cors());
   app.use(express.json());
 
-  // API Route: Antibiotic Resistance Prediction (Real ML Inference)
-  app.post("/api/predict", async (req, res) => {
-    const { 
-      bacteria, antibiotic, dosage, 
-      age = 45, sex = 'M', exposure = 5, 
-      ward = 'General', comorbidity = 2, 
-      ndm1 = 0, mcr1 = 0 
-    } = req.body;
-
-    // Call the Python inference bridge (src/predict.py)
-    const pythonCmd = process.platform === 'win32' ? 'python' : 'python3';
-    
-    const runInference = () => {
-      return new Promise((resolve, reject) => {
-        const cmd = `${pythonCmd} src/predict.py --bacteria "${bacteria}" --antibiotic "${antibiotic}" --dosage ${dosage} --age ${age} --sex "${sex}" --exposure ${exposure} --ward "${ward}" --comorbidity ${comorbidity} --ndm1 ${ndm1} --mcr1 ${mcr1}`;
-        exec(cmd, (error, stdout, stderr) => {
-          if (error) {
-            console.error(`Inference Error: ${stderr}`);
-            reject(stderr);
-            return;
-          }
-          try {
-            // The output of predict.py is now a formatted string for CLI, 
-            // but the JSON is still needed for the API.
-            // Let's modify predict.py to output JSON if requested, or just parse the last line if it's JSON.
-            // Actually, I'll just parse the JSON from the stdout which I'll ensure is there.
-            const lines = stdout.trim().split('\n');
-            const jsonStr = lines.find(l => l.startsWith('{') && l.endsWith('}'));
-            if (jsonStr) {
-              resolve(JSON.parse(jsonStr));
-            } else {
-              // Fallback: if we can't find JSON, we'll try to parse the whole thing
-              resolve(JSON.parse(stdout));
-            }
-          } catch (e) {
-            reject("Failed to parse model output");
-          }
-        });
-      });
-    };
-
-    let prediction = "Susceptible";
-    let probability = 0.94;
-    let mdrRiskScore = 15;
-    let explanation = "The simulated model identified potential susceptibility based on standard clinical guidelines.";
-    let recommendation = "Continue monitoring.";
-    let realModelUsed = false;
-
+  // API Route: Get Tabular Data
+  app.get("/api/data", (req, res) => {
     try {
-      const result: any = await runInference();
-      if (result.status === "success") {
-        prediction = result.prediction;
-        probability = result.probability;
-        mdrRiskScore = result.mdrRiskScore;
-        explanation = result.explanation;
-        recommendation = result.recommendation;
-        realModelUsed = true;
-      } else {
-        console.warn("Model inference failed, falling back to simulation:", result.error);
-      }
+      const data = loadTabularData();
+      res.json(data);
     } catch (error) {
-      console.warn("Python bridge failed, falling back to simulation:", error);
+      console.error("Error loading tabular data:", error);
+      res.status(500).json({ error: "Failed to load tabular data" });
     }
+  });
 
-    res.json({
-      prediction,
-      probability,
-      explanation,
-      recommendation,
-      mdrRiskScore,
-      realModelUsed
+  // API Route: Get CARD Data
+  app.get("/api/card", (req, res) => {
+    try {
+      const priors = loadCardData();
+      res.json(priors);
+    } catch (error) {
+      console.error("Error loading CARD data:", error);
+      res.status(500).json({ error: "Failed to load CARD data" });
+    }
+  });
+
+  // API Route: Get Location Data
+  app.get("/api/location", (req, res) => {
+    try {
+      const data = loadLocationData();
+      res.json(data);
+    } catch (error) {
+      console.error("Error loading location data:", error);
+      res.status(500).json({ error: "Failed to load location data" });
+    }
+  });
+
+  // API Route: Train Model
+  app.post("/api/train", (req, res) => {
+    console.log("Starting model training...");
+    exec("python3 train_model.py", (error, stdout, stderr) => {
+      if (error) {
+        console.error(`Training error: ${error.message}`);
+        return res.status(500).json({ error: "Training failed", details: stderr });
+      }
+      console.log(`Training output: ${stdout}`);
+      res.json({ message: "Training complete", output: stdout });
     });
   });
 
-  // API Route: Clinical Simulation
-  app.get("/api/simulation", (req, res) => {
-    const scenarios = [
-      { id: 1, case: "72-year-old male with UTI, suspected E. coli infection.", strain: "E. coli", currentAntibiotic: "Amoxicillin" },
-      { id: 2, case: "24-year-old female with skin infection, suspected S. aureus.", strain: "S. aureus", currentAntibiotic: "Vancomycin" },
-      { id: 3, case: "45-year-old male with pneumonia, suspected K. pneumoniae.", strain: "K. pneumoniae", currentAntibiotic: "Ciprofloxacin" }
-    ];
-    res.json(scenarios[Math.floor(Math.random() * scenarios.length)]);
+  // API Route: Get Metrics
+  app.get("/api/metrics", (req, res) => {
+    try {
+      const metricsPath = path.join(process.cwd(), 'models', 'metrics.json');
+      const insightsPath = path.join(process.cwd(), 'models', 'insights.json');
+      
+      if (!fs.existsSync(metricsPath)) {
+        return res.status(404).json({ error: "Metrics not found. Please train the model first." });
+      }
+      
+      const metrics = JSON.parse(fs.readFileSync(metricsPath, 'utf8'));
+      const insights = fs.existsSync(insightsPath) ? JSON.parse(fs.readFileSync(insightsPath, 'utf8')) : {};
+      
+      res.json({ metrics, insights });
+    } catch (error) {
+      console.error("Error loading metrics:", error);
+      res.status(500).json({ error: "Failed to load metrics" });
+    }
+  });
+
+  // API Route: Predict
+  app.post("/api/predict", (req, res) => {
+    const inputData = req.body;
+    
+    const pythonProcess = spawn('python3', ['predict.py']);
+    let result = '';
+    let error = '';
+
+    pythonProcess.stdin.write(JSON.stringify(inputData));
+    pythonProcess.stdin.end();
+
+    pythonProcess.stdout.on('data', (data) => {
+      result += data.toString();
+    });
+
+    pythonProcess.stderr.on('data', (data) => {
+      error += data.toString();
+    });
+
+    pythonProcess.on('close', (code) => {
+      if (code !== 0) {
+        console.error(`Prediction process exited with code ${code}: ${error}`);
+        return res.status(500).json({ error: "Prediction failed", details: error });
+      }
+      try {
+        const prediction = JSON.parse(result);
+        res.json(prediction);
+      } catch (e) {
+        console.error("Failed to parse prediction result:", result);
+        res.status(500).json({ error: "Failed to parse prediction result", raw: result });
+      }
+    });
   });
 
   // Vite middleware for development

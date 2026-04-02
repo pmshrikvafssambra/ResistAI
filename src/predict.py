@@ -59,7 +59,7 @@ def predict(bacteria, antibiotic, dosage_mg, age=45, sex='M', exposure=5, ward='
         mdr_risk = int(probabilities[2] * 100)
         
         # Generate Clinical Insights (Explanation & Recommendation)
-        explanation, recommendation = get_clinical_insights(bacteria, antibiotic, prediction, ndm1, mcr1)
+        explanation, recommendation = get_clinical_insights(bacteria, antibiotic, prediction, ndm1, mcr1, dosage_mg)
         
         return {
             "prediction": prediction,
@@ -76,8 +76,10 @@ def predict(bacteria, antibiotic, dosage_mg, age=45, sex='M', exposure=5, ward='
             },
             "status": "success"
         }
+    except Exception as e:
+        return {"error": str(e)}
 
-def get_clinical_insights(bacteria, antibiotic, prediction, ndm1, mcr1):
+def get_clinical_insights(bacteria, antibiotic, prediction, ndm1, mcr1, dosage_mg):
     """
     Generates deterministic clinical insights based on the ML prediction 
     and biological markers. This replaces the need for an external LLM.
@@ -103,9 +105,6 @@ def get_clinical_insights(bacteria, antibiotic, prediction, ndm1, mcr1):
         recommendation = "Continue current regimen. Monitor for clinical improvement over the next 48-72 hours."
         
     return explanation, recommendation
-        
-    except Exception as e:
-        return {"error": str(e)}
 
 if __name__ == "__main__":
     import argparse
