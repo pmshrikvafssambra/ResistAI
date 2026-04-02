@@ -179,12 +179,33 @@ def train():
     
     # Save model and metadata
     os.makedirs('models', exist_ok=True)
+    os.makedirs('plots', exist_ok=True)
+    os.makedirs('data', exist_ok=True)
+    
     joblib.dump(best_pipeline, 'models/amr_model.joblib')
     joblib.dump(le, 'models/label_encoder.joblib')
+    
+    # Save processed data for audit
+    X_train.to_csv('data/X_train_processed.csv', index=False)
+    X_test.to_csv('data/X_test_processed.csv', index=False)
     
     with open('models/metrics.json', 'w') as f:
         json.dump(metrics, f)
         
+    # Generate Visual Plots
+    import matplotlib.pyplot as plt
+    import seaborn as sns
+    
+    # 1. Confusion Matrix Plot
+    plt.figure(figsize=(10, 8))
+    cm = confusion_matrix(y_test, y_pred)
+    sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', xticklabels=le.classes_, yticklabels=le.classes_)
+    plt.title('Confusion Matrix - AMR Prediction')
+    plt.ylabel('Actual Status')
+    plt.xlabel('Predicted Status')
+    plt.savefig('plots/confusion_matrix.png', dpi=300, bbox_inches='tight')
+    plt.close()
+    
     # Generate insights
     # 1. Feature importance (permutation importance for pipelines)
     from sklearn.inspection import permutation_importance
@@ -196,6 +217,14 @@ def train():
         'feature': feature_names,
         'importance': perm_importance.importances_mean
     }).sort_values('importance', ascending=False)
+    
+    # 2. Feature Importance Plot
+    plt.figure(figsize=(12, 6))
+    sns.barplot(x='importance', y='feature', data=importance_df, palette='viridis')
+    plt.title('Feature Importance (Permutation)')
+    plt.xlabel('Mean Importance Decrease')
+    plt.savefig('plots/feature_importance.png', dpi=300, bbox_inches='tight')
+    plt.close()
     
     insights = {
         'feature_importance': importance_df.to_dict(orient='records'),
