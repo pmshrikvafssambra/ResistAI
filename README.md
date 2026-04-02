@@ -85,6 +85,7 @@ This project addresses one of the most critical global healthcare challenges: **
 ## ⚡ Installation
 
 ```bash
+git clone https://github.com/pmshrikvafssambra/ResistAI.git
 pip install -r requirements.txt
 ```
 
